@@ -919,7 +919,64 @@ namespace ProceduralMaze
             {
                 tint = Color.Yellow;
             }
+
+            DrawPathOverlay(spriteBatch);
+
             spriteBatch.Draw(_texture, Position - new Vector2(_radius), tint);
+        }
+
+        private void DrawPathOverlay(SpriteBatch spriteBatch)
+        {
+            Color pathColour;
+            if (ActiveBehaviourMode == BehaviourMode.Chase)
+            {
+                pathColour = Color.Red * 0.65f;
+            }
+            else if (ActiveBehaviourMode == BehaviourMode.Investigate)
+            {
+                pathColour = Color.Orange * 0.65f;
+            }
+            else if (ActiveBehaviourMode == BehaviourMode.Explore)
+            {
+                pathColour = Color.Green * 0.65f;
+            }
+            else
+            {
+                pathColour = Color.Yellow * 0.65f;
+            }
+
+            if (_wallJumpTarget.HasValue)
+            {
+                DrawLine(spriteBatch, Position, _wallJumpTarget.Value, pathColour, 2f);
+                return;
+            }
+
+            if (_currentPath == null || _currentPathIndex >= _currentPath.Count)
+            {
+                return;
+            }
+
+            Vector2 previousPoint = Position;
+            for (int i = _currentPathIndex; i < _currentPath.Count; i++)
+            {
+                Vector2 nextPoint = _currentPath[i];
+                DrawLine(spriteBatch, previousPoint, nextPoint, pathColour, 2f);
+                previousPoint = nextPoint;
+            }
+        }
+
+        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color colour, float thickness)
+        {
+            Vector2 edge = end - start;
+            float length = edge.Length();
+
+            if (length <= 0f)
+            {
+                return;
+            }
+
+            float rotation = (float)Math.Atan2(edge.Y, edge.X);
+            spriteBatch.Draw(_lineTexture, start, null, colour, rotation, Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
         }
     }
 }
